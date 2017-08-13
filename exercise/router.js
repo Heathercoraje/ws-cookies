@@ -1,7 +1,11 @@
 'use strict';
 
-const { parse } = require('url');
-const { readFile } = require('fs');
+const {
+  parse
+} = require('url');
+const {
+  readFile
+} = require('fs');
 
 const notFoundPage = '<p style="font-size: 10vh; text-align: center;">404!</p>';
 
@@ -12,8 +16,7 @@ module.exports = (req, res) => {
         './index.html',
         (err, data) => {
           res.writeHead(
-            200,
-            {
+            200, {
               'Content-Type': 'text/html',
               'Content-Length': data.length
             }
@@ -21,14 +24,40 @@ module.exports = (req, res) => {
           return res.end(data);
         }
       );
+    case 'POST /login':
+      res.writeHead(
+        302, {
+          'location': '/',
+          'Set-Cookie': 'logged_in=true; HttpOnly; Max-Age=1000'
+        });
+      return res.end('login!');
+
+    case 'POST /logout':
+      res.writeHead(
+        302, {
+          'location': '/',
+          'Set-Cookie': 'logged_in=false; HttpOnly; Max-Age=1000'
+        });
+      return res.end('logout!');
+
+    case 'GET /auth_check':
+      if (req.headers.cookie.match(/logged_in=true/)) {
+        res.writeHead(
+          200, {
+            'Content-Type': 'text/html'
+          });
+        return res.end('you are vertified');
+      } else {
+        res.writeHead(401, 'Content-Type: text/html');
+        return res.end('you are out');
+      }
     default:
       res.writeHead(
-        404,
-        {
+        404, {
           'Content-Type': 'text/html',
           'Content-Length': notFoundPage.length
         }
       );
       return res.end(notFoundPage);
-  }
+  };
 }
